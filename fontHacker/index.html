@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>FontHacker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/icon_32.png?v=4" type="image/png" sizes="32x32">
+    <link rel="icon" href="images/icon_64.png?v=4" type="image/png" sizes="64x64" >
+    <link rel="shortcut icon" href="images/icon_32.png?v=4" type="image/png">
+    <link rel="shortcut icon" href="images/icon_64.png?v=4" type="image/png">
+</head>
+
+<body>
+<!-- 헤더 -->
+<nav class="navbar fh-navbar py-3">
+    <div class="container-fluid justify-content-center text-center">
+        <div>
+            <a href="index.html" class="text-white fw-bold fs-3 fh-brand" style="text-decoration: none;">
+                FontHacker
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- 본문 -->
+<div class="container fh-container py-5">
+    <div class="fh-section text-center">
+        <p class="lead mb-4">손글씨 이미지를 업로드 하세요</p>
+        <p class="lead mb-4"></p>
+        <div class="d-flex justify-content-center flex-wrap gap-5 upload-row">
+            <!-- 카드 A -->
+            <div class="upload-card">
+                <div class="d-flex align-items-center flex-wrap gap-4">
+                    <span class="badge bg-primary-subtle text-primary border badge-ab">A</span>
+                    <small class="text-secondary"></small>
+                </div>
+                <div class="upload-box mt-2" id="box1"
+                     ondrop="dropHandler(event, 'file1')"
+                     ondragover="dragOverHandler(event)"
+                     ondragleave="dragLeaveHandler(event)">
+                    <div class="text-center px-3">
+                        <div class="mb-1">이미지 A</div>
+                        <small class="text-secondary">드래그 앤 드롭 또는 아래 버튼으로 업로드</small>
+                    </div>
+                </div>
+                <input type="file" id="file1" accept="image/*" onchange="previewImage('file1', 'box1')">
+                <label for="file1" class="btnSample upload-btn">이미지 A 업로드</label>
+                <div class="upload-hint"></div>
+            </div>
+
+            <!-- 카드 B -->
+            <div class="upload-card">
+                <div class="d-flex align-items-center flex-wrap gap-4">
+                    <span class="badge bg-success-subtle text-success border badge-ab">B</span>
+                    <small class="text-secondary"></small>
+                </div>
+                <div class="upload-box mt-2" id="box2"
+                     ondrop="dropHandler(event, 'file2')"
+                     ondragover="dragOverHandler(event)"
+                     ondragleave="dragLeaveHandler(event)">
+                    <div class="text-center px-3">
+                        <div class="mb-1">이미지 B</div>
+                        <small class="text-secondary">드래그 앤 드롭 또는 아래 버튼으로 업로드</small>
+                    </div>
+                </div>
+                <input type="file" id="file2" accept="image/*" onchange="previewImage('file2', 'box2')">
+                <label for="file2" class="btnSample upload-btn">이미지 B 업로드</label>
+                <div class="upload-hint"></div>
+            </div>
+        </div>
+
+        <!-- 액션 -->
+        <div class="fh-actions d-flex justify-content-center gap-5 mt-4">
+            <button class="btnStart" onclick="startAnalysis()">분석 시작</button>
+            <a href="draw.html" class="btnWrite">직접 써보기</a>
+        </div>
+    </div>
+    <footer class="fh-footer">© 2025 FontHacker</footer>
+</div>
+
+<script>
+    function previewImage(fileInputId, boxId) {
+        const input = document.getElementById(fileInputId);
+        const box = document.getElementById(boxId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const result = e?.target?.result;
+                if (typeof result === 'string') {
+                    box.classList.remove('dragover');
+                    box.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = result;
+                    img.alt = fileInputId === 'file1' ? '업로드된 이미지 A' : '업로드된 이미지 B';
+                    box.appendChild(img);
+                    localStorage.setItem(fileInputId === 'file1' ? 'handwritingImageA' : 'handwritingImageB', result);
+                } else {
+                    // / 드물게 ArrayBuffer/null이 올 경우의 처리 (옵션)
+                    console.warn('FileReader.result is not a string:', result);
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function dragOverHandler(ev) {
+        ev.preventDefault();
+        ev.currentTarget.classList.add('dragover');
+        ev.dataTransfer.dropEffect = "copy";
+    }
+    function dragLeaveHandler(ev){
+        ev.currentTarget.classList.remove('dragover');
+    }
+    function dropHandler(ev, fileInputId) {
+        ev.preventDefault();
+        ev.currentTarget.classList.remove('dragover');
+        const files = ev.dataTransfer.files;
+        if (files.length > 0) {
+            const fileInput = document.getElementById(fileInputId);
+            // 파일 선택 이벤트 트리거를 위해 DataTransfer 사용
+            const dt = new DataTransfer();
+            dt.items.add(files[0]);
+            fileInput.files = dt.files;
+            previewImage(fileInputId, fileInputId === 'file1' ? 'box1' : 'box2');
+        }
+    }
+    function startAnalysis() {
+        const imgA = localStorage.getItem("handwritingImageA");
+        const imgB = localStorage.getItem("handwritingImageB");
+        if (!imgA || !imgB) {
+            alert("두 이미지를 모두 업로드하거나 직접 그려야 분석을 시작할 수 있습니다.");
+            return;
+        }
+        window.location.href = "result.html";
+    }
+</script>
+</body>
+</html>

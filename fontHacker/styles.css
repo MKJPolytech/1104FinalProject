@@ -1,0 +1,349 @@
+:root{
+    --fh-navy:#002147;
+    --fh-navy-2:#07305a;
+    --fh-muted:#6c757d;
+    --fh-border:#dfe3e7;
+    --fh-ring:#7aa7ff;
+}
+
+body{
+    background: linear-gradient(180deg, #f6f9ff 0%, #eef3ff 50%, #f7faff 100%);
+}
+
+.fh-navbar {
+    background: linear-gradient(90deg, #002147, #00bfa6, #07305a);
+    background-size: 200% 200%;
+    animation: navbarGradient 17s ease-in-out infinite alternate;
+
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+}
+
+@keyframes navbarGradient {
+    0% {
+        background-position: 0 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+.fh-brand {
+    letter-spacing: 0.05em;
+    font-family: 'Pretendard', sans-serif;
+    font-weight: 750 !important; /* 부트스트랩 fw-bold(700)보다 더 굵게 */
+    line-height: 1;
+    padding-right: 2px;
+}
+.lead {
+    font-family: 'Pretendard', 'Noto Sans KR', 'Roboto', sans-serif;
+    font-weight: 600;
+    font-size: 1.35rem;
+    color: #1a1a1a;
+    letter-spacing: 0.02em;       /
+    text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    font-style: normal;
+}
+.fh-container{
+    max-width: 980px;
+}
+.fh-section {
+    background: #fff;
+    border: 1px solid var(--fh-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 14px rgba(0,0,0,.03);
+    padding: 28px;
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.fh-section:hover {
+    box-shadow: 0 10px 18px rgba(0,0,0,.06); /* 그림자 약간 강조 */
+    border-color: #e6ecf5; /* 테두리를 살짝 더 밝게 */
+}
+
+/* 버튼 */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+.btnSample {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 450;
+    padding: 10px 30px;
+    border-radius: 999px;
+    border: 1px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btnSample:hover {
+    background-color: #007bff;
+    color: white;
+}
+.btnStart {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 450;
+    padding: 10px 30px;
+    border-radius: 999px;
+    border: 1px solid green;
+    background-color: green;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btnStart:hover {
+    background-color: darkgreen;
+    color: white;
+}
+.btnWrite{
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 450;
+    padding: 10px 30px;
+    border-radius: 999px;
+    border: 1px solid #333333;
+    background-color: white;
+    color: #333333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btnWrite:hover {
+    background-color: #333333;
+    color: white;
+}
+.btnErase{
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 450;
+    padding: 5px 15px;
+    border-radius: 7px;
+    border: 1px solid #555555;
+    background-color: white;
+    color: #555555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btnErase:hover {
+    background-color: #555555;
+    color: white;
+}
+.btnNext{
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 450;
+    padding: 5px 15px;
+    border-radius: 7px;
+    border: 1px solid #4169e1;
+    background-color: #4169e1;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btnNext:hover {
+    background-color: blue;
+    color: white;
+}
+
+.upload-card{
+    width: 280px;
+    border:1px solid var(--fh-border);
+    border-radius:14px;
+    padding:16px 16px 18px;
+    background:#fff;
+    box-shadow: 0 6px 14px rgba(0,0,0,.04);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.upload-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 10px 18px rgba(0,0,0,.06);
+}
+.badge-ab{
+    font-weight:600;
+    border-radius:999px;
+    padding:.35rem .6rem;
+}
+.upload-box{
+    width: 100%;
+    height: 260px;
+    border: 2px dashed #cfd6dc;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: var(--fh-muted);
+    font-size:14px;
+    margin-top:10px;
+    position:relative;
+    overflow:hidden;
+    background:#fafcff;
+    transition:border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.upload-box img{
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+}
+
+.upload-hint{
+    font-size:.85rem;
+    color:#8a97a3;
+    margin-top:10px;
+}
+.upload-btn{
+    width:100%;
+    margin-top:12px;
+}
+
+input[type="file"]{ display:none; }
+
+#stepTitle {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 600;
+    color: var(--fh-navy);
+}
+
+.fh-actions .btn{
+    min-width: 180px;
+}
+
+.fh-footer {
+    position: fixed;
+    left: 20px;
+    bottom: 10px;
+    color: #a0a9b3;
+    font-size: .9rem;
+}
+
+.sample-text {
+    font-family: 'Nanum Pen Script', cursive; /* 폰트 변경 */
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 1.36rem;
+    font-weight: bold;
+    user-select: none; /* 드래그 방지 */
+}
+
+/* canvas */
+.canvas-wrap {
+    border: 2px dashed #ced4da;
+    border-radius: 10px;
+    display: inline-block; /* 크기를 캔버스에 맞게 */
+}
+
+canvas {
+    touch-action: none;
+    background: #fff;
+    border: none;
+}
+
+.handwrite-canvas{
+    width: min(72vw, 1300px);          /* 가로 크기 */
+    height: clamp(128px, 12vw, 128px); /* 세로 크기 */
+    background:#fff;
+    border:none;
+}
+
+/* loading */
+.loading-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding-top: 5vh;
+}
+
+.loading-wrap p {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.result-card {
+    border: 1px solid #dee2e6;
+    border-radius: 1rem;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.image-placeholder {
+    width: 300px;
+    height: 150px;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 14px;
+    border-radius: 10px;
+    margin: 10px;
+    overflow: hidden;
+}
+
+.image-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.guide-box {
+    background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+    border: 1px solid var(--fh-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+    padding: 24px 30px;
+    margin: 40px auto;
+    width: 43%;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.guide-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.guide-title {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 600;
+    font-size: 23px;
+    color: var(--fh-navy);
+    padding-bottom: 15px;
+    position: relative;
+}
+
+.guide-title::after {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 3px;
+    background-color: var(--fh-navy);
+    margin: 8px auto 0;
+    border-radius: 2px;
+}
+
+.guide {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 450;
+    text-align: left;
+    display: inline-block; /* 왼쪽 정렬 유지 + 박스 중앙 배치 */
+}
+
+.guide .item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.guide .item span {
+    font-weight: 450;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.guide-box {
+    animation: fadeInUp 0.6s ease both;
+}

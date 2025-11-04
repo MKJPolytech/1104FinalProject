@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>FontHacker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/icon_32.png?v=4" type="image/png" sizes="32x32">
+    <link rel="icon" href="images/icon_64.png?v=4" type="image/png" sizes="64x64" >
+    <link rel="shortcut icon" href="images/icon_32.png?v=4" type="image/png">
+    <link rel="shortcut icon" href="images/icon_64.png?v=4" type="image/png">
+  <script>
+      /**
+       * @typedef {Object} VerifyResponse
+       * @property {boolean} ok
+       * @property {string} [reason]
+       * @property {string} [message]
+       * @property {number} cosine_similarity
+       * @property {string} judgment
+       */
+
+      window.onload = function() {
+      const imgDataA = localStorage.getItem("handwritingImageA");
+      const imgDataB = localStorage.getItem("handwritingImageB");
+
+      if (imgDataA) {
+        const imgA = document.createElement("img");
+        imgA.src = imgDataA;
+        document.querySelectorAll(".image-placeholder")[0].innerHTML = "";
+        document.querySelectorAll(".image-placeholder")[0].appendChild(imgA);
+      }
+
+      if (imgDataB) {
+        const imgB = document.createElement("img");
+        imgB.src = imgDataB;
+        document.querySelectorAll(".image-placeholder")[1].innerHTML = "";
+        document.querySelectorAll(".image-placeholder")[1].appendChild(imgB);
+      }
+
+      if (imgDataA && imgDataB) {
+        fetch('http://localhost:5000/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageA: imgDataA, imageB: imgDataB })
+        })
+                .then(res => res.json())
+                .then(data => {
+                  // 1) 품질 가드 처리
+                    if (data.ok === false) {
+                        // 공통 에러 핸들링 강화
+                        const lines = [];
+                        if (data.reason) lines.push(`이유: ${data.reason}`);
+                        if (data.message) lines.push(`메시지: ${data.message}`);
+
+                        // 디버그 모드일 때 서버가 준 원본 로그를 붙여 보여주기
+                        if (data.raw_stdout) lines.push(`\n[stdout]\n${data.raw_stdout}`);
+                        if (data.raw_stderr) lines.push(`\n[stderr]\n${data.raw_stderr}`);
+                        if (typeof data.returncode !== 'undefined') lines.push(`리턴코드: ${data.returncode}`);
+
+                        document.getElementById("score").innerText = "—";
+                        document.getElementById("judgment").innerText =
+                            lines.join("\n") || "분석 중 오류가 발생했습니다.";
+
+                        document.getElementById('loading').classList.add('d-none');
+                        document.getElementById('result-content').classList.remove('d-none');
+                        return;
+                    }
+
+                  // 2) 일반 실패 처리
+                  if (data.ok === false) {
+                    document.getElementById("score").innerText = "—";
+                    document.getElementById("judgment").innerText =
+                            data.message || "분석 중 오류가 발생했습니다.";
+
+                    document.getElementById('loading').classList.add('d-none');
+                    document.getElementById('result-content').classList.remove('d-none');
+                    return;
+                  }
+
+                  // 3) 정상 성공 케이스
+                  const sim = parseFloat(data.cosine_similarity).toFixed(4);
+                  document.getElementById("score").innerText = `코사인 유사도: ${sim}`;
+
+                  let judgmentText = "";
+                  if (data.judgment.includes("같은")) {
+                    judgmentText = "같은 작성자일 가능성이 높습니다.";
+                  } else if (data.judgment.includes("동일")) {
+                    judgmentText = "동일 작성자일 수도 있습니다.";
+                  } else {
+                    judgmentText = "다른 작성자일 가능성이 높습니다.";
+                  }
+                  document.getElementById("judgment").innerText = judgmentText;
+
+                  document.getElementById('loading').classList.add('d-none');
+                  document.getElementById('result-content').classList.remove('d-none');
+                })
+                .catch(err => {
+                  console.error("서버 오류:", err);
+                  document.getElementById("judgment").innerText = "분석 중 오류가 발생했습니다.";
+                  document.getElementById('loading').classList.add('d-none');
+                  document.getElementById('result-content').classList.remove('d-none');
+                });
+      }
+    }
+  </script>
+</head>
+<body class="bg-white">
+<nav class="navbar fh-navbar py-3">
+    <div class="container-fluid justify-content-center text-center">
+        <div>
+            <a href="index.html" class="text-white fw-bold fs-3 fh-brand" style="text-decoration: none;">
+                FontHacker
+            </a>
+        </div>
+    </div>
+</nav>
+<footer class="fh-footer">© 2025 FontHacker</footer>
+<div class="container py-5 text-center">
+    <div id="loading" class="loading-wrap">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <p>AI가 손글씨를 분석 중입니다...</p>
+    </div>
+
+  <div id="result-content" class="d-none">
+    <div class="result-card mx-auto" style="max-width: 800px;">
+      <h2 class="mb-4">분석 결과</h2>
+      <div class="d-flex justify-content-center mb-4 flex-wrap">
+        <div class="image-placeholder">이미지 A</div>
+        <div class="image-placeholder">이미지 B</div>
+      </div>
+      <p id="score" class="fs-5 fw-semibold text-primary"></p>
+      <p id="judgment" class="fs-5"></p>
+      <div class="mt-4">
+        <a href="index.html" class="btn btn-success rounded-pill ms-2">다시 분석하기</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

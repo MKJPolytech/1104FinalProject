@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>직접 손글씨 쓰기</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/icon_32.png?v=4" type="image/png" sizes="32x32">
+    <link rel="icon" href="images/icon_64.png?v=4" type="image/png" sizes="64x64" >
+    <link rel="shortcut icon" href="images/icon_32.png?v=4" type="image/png">
+    <link rel="shortcut icon" href="images/icon_64.png?v=4" type="image/png">
+</head>
+<body class="bg-light text-center">
+<nav class="navbar fh-navbar py-3">
+    <div class="container-fluid justify-content-center text-center">
+        <div>
+            <a href="index.html" class="text-white fw-bold fs-3 fh-brand" style="text-decoration: none;">
+                FontHacker
+            </a>
+        </div>
+    </div>
+</nav>
+<footer class="fh-footer">© 2025 FontHacker</footer>
+
+<div class="container py-5" >
+    <h2 id="stepTitle" class="mb-3">A를 써주세요</h2>
+    <div class="d-flex justify-content-center mt-3">
+        <p class="sample-text">샘플문장: I'm a boy, you're a girl</p>
+    </div>
+    <div class="d-flex justify-content-center">
+        <div class="canvas-wrap">
+            <canvas id="canvasOne" class="handwrite-canvas"></canvas>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <button class="btnErase btn-sm" id="clearBtn">지우기</button>
+        <button id="nextBtn" class="btnNext btn-primary">다음(B)</button>
+    </div>
+    <div class="guide-box">
+        <div class="guide-title">작성 가이드</div>
+        <div class="guide">
+            <div class="guide">
+                <div class="item"><span>1. 한글도 가능은 하나, 일단 영어로 학습된 AI 입니다.</span> </div>
+                <div class="item"><span>2. 샘플 문장을 따라, 정갈하게 써 주시길 권장합니다.</span> </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // ===== DPI 스케일 적용 (좌표계는 CSS 픽셀로 유지) =====
+    function applyDpiScale(canvas){
+        const dpr  = window.devicePixelRatio || 1;
+        const cssW = Math.round(parseFloat(getComputedStyle(canvas).width));
+        const cssH = Math.round(parseFloat(getComputedStyle(canvas).height));
+        canvas.width  = Math.max(1, Math.round(cssW * dpr));
+        canvas.height = Math.max(1, Math.round(cssH * dpr));
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // 이후 모든 그리기는 CSS 좌표계로
+        ctx.clearRect(0, 0, cssW, cssH);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, cssW, cssH);
+    }
+
+    // ===== 캔버스 지우기 (CSS 좌표 사용) =====
+    function clearCanvas(canvas){
+        const ctx  = canvas.getContext('2d');
+        const cssW = Math.round(parseFloat(getComputedStyle(canvas).width));
+        const cssH = Math.round(parseFloat(getComputedStyle(canvas).height));
+        ctx.clearRect(0, 0, cssW, cssH);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, cssW, cssH);
+    }
+
+    // ===== 안전 리사이즈: 잉크 보존 =====
+    function resizePreserve(canvas){
+        const dpr  = window.devicePixelRatio || 1;
+        const cssW = Math.round(parseFloat(getComputedStyle(canvas).width));
+        const cssH = Math.round(parseFloat(getComputedStyle(canvas).height));
+
+        const backup = document.createElement('canvas');
+        backup.width  = canvas.width;
+        backup.height = canvas.height;
+        const bctx = backup.getContext('2d');
+        bctx.drawImage(canvas, 0, 0);
+
+        canvas.width  = Math.max(1, Math.round(cssW * dpr));
+        canvas.height = Math.max(1, Math.round(cssH * dpr));
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, cssW, cssH);
+        ctx.drawImage(backup, 0, 0, backup.width, backup.height, 0, 0, cssW, cssH);
+    }
+
+    // ===== 백/그레이 PNG DataURL (CSS 크기 고정 출력) =====
+    function canvasToWhiteGrayDataURL(canvas){
+        const cssW = Math.round(parseFloat(getComputedStyle(canvas).width));
+        const cssH = Math.round(parseFloat(getComputedStyle(canvas).height));
+        const off  = document.createElement('canvas');
+        off.width  = cssW;  // CSS 크기 기준으로 내보내기
+        off.height = cssH;
+        const octx = off.getContext('2d');
+
+        octx.fillStyle = '#ffffff';
+        octx.fillRect(0, 0, cssW, cssH);
+        octx.drawImage(canvas, 0, 0, cssW, cssH);
+
+        const imgData = octx.getImageData(0, 0, cssW, cssH);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4){
+            const r = data[i], g = data[i+1], b = data[i+2];
+            const gray = 0.299*r + 0.587*g + 0.114*b;
+            data[i] = data[i+1] = data[i+2] = gray;
+        }
+        octx.putImageData(imgData, 0, 0);
+        return off.toDataURL('image/png');
+    }
+
+    function toCanvasUserSpace(canvas, ctx, clientX, clientY, rawEvent){
+        if (rawEvent && typeof rawEvent.offsetX === 'number') {
+            return { x: rawEvent.offsetX, y: rawEvent.offsetY };
+        }
+        const rect = canvas.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const cssW = parseFloat(getComputedStyle(canvas).width);
+        const cssH = parseFloat(getComputedStyle(canvas).height);
+        return { x: x * (cssW/rect.width), y: y * (cssH/rect.height) };
+    }
+
+    // ===== 펜/마우스/터치 드로잉 =====
+    function enableDrawingLite(canvas){
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        // ── 파라미터
+        const INPUT_GAIN_X = 0.88;
+        const INPUT_GAIN_Y = 0.965;
+        const WIDTH_GAIN   = 0.965;
+        const DEADZONE     = 0.385;
+
+        const MIN_W = 3.9 * WIDTH_GAIN;
+        const MAX_W = 7.8 * WIDTH_GAIN;
+        const VMIN  = 0.05;
+        const VMAX  = 1.65;
+
+        let drawing = false;
+        let last = null;
+        let useRaw = false;
+
+        const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+        const lerp  = (a,b,t)=>a+(b-a)*t;
+
+        function pressureToW(p, v){
+            const nv = clamp((v - VMIN) / (VMAX - VMIN), 0, 1);
+            const base = lerp(MAX_W, MIN_W, nv);      // 빠르면 얇게
+            return clamp(base * (0.65 + 0.45 * clamp(p, 0, 1)), MIN_W, MAX_W);
+        }
+
+        function addAndStroke(nx, ny, t, p){
+            const nowPt = { x:nx, y:ny, t, pressure:p, v:0 };
+            if (last){
+                const dt = Math.max(1e-3, (t - last.t) / 1000);
+                const v  = Math.hypot(nx - last.x, ny - last.y) / dt;
+                nowPt.v = v;
+
+                if (Math.hypot(nx - last.x, ny - last.y) >= DEADZONE){
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = pressureToW(nowPt.pressure, nowPt.v);
+                    ctx.beginPath();
+                    ctx.moveTo(last.x, last.y);
+                    ctx.lineTo(nowPt.x, nowPt.y);
+                    ctx.stroke();
+                    last = nowPt;
+                }
+            } else {
+                last = nowPt;
+            }
+        }
+
+        function handleMoveLike(e){
+            if (!drawing || e.target !== canvas) return;
+            e.preventDefault();
+
+            // rawUpdate가 한 번이라도 들어오면 move는 무시(이중 그리기 방지)
+            if (!useRaw && e.type === 'pointerRawUpdate') useRaw = true;
+            if (useRaw && e.type === 'pointermove') return;
+
+            const now = performance.now();
+            const p   = (e.pressure === 0 ? 0.5 : (e.pressure || 0.5));
+            const pt  = toCanvasUserSpace(canvas, ctx, e.clientX, e.clientY, e);
+
+            if (last){
+                const x = last.x + (pt.x - last.x) * INPUT_GAIN_X;
+                const y = last.y + (pt.y - last.y) * INPUT_GAIN_Y;
+                addAndStroke(x, y, now, p);
+            } else {
+                addAndStroke(pt.x, pt.y, now, p);
+            }
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            if (e.target !== canvas) return;
+            if (!(e.pointerType === 'mouse' ? e.button === 0 : true)) return;
+            const p = (e.pressure === 0 ? 0.5 : (e.pressure || 0.5));
+
+            e.preventDefault();
+            useRaw = false;                // 새 스트로크마다 초기화
+            canvas.setPointerCapture?.(e.pointerId);
+
+            const pt = toCanvasUserSpace(canvas, ctx, e.clientX, e.clientY, e);
+            drawing = true;
+            last = null;
+
+            // 시작점 즉시 한 픽셀 찍고 시작 → 커서와 시각적 오프셋 제거
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 1.25, 0, Math.PI*2);
+            ctx.fill();
+
+            addAndStroke(pt.x, pt.y, performance.now(), p);
+        }, { passive:false });
+
+        canvas.addEventListener('pointermove',      handleMoveLike, { passive:false });
+        canvas.addEventListener('pointerRawUpdate', handleMoveLike, { passive:false });
+
+        function end(e){
+            if (!drawing) return;
+            drawing = false;
+            try{ canvas.releasePointerCapture?.(e.pointerId); }catch{}
+        }
+        canvas.addEventListener('pointerup', end, { passive:false });
+        canvas.addEventListener('pointercancel', end, { passive:false });
+        canvas.addEventListener('pointerleave', end, { passive:false });
+    }
+
+    // ===== 흐름 제어(A→B→result.html) =====
+    let currentStep = 'A';
+    let capturedA = null;
+
+    function captureAndNext(){
+        const c = document.getElementById('canvasOne');
+        const data = canvasToWhiteGrayDataURL(c);
+
+        if (currentStep === 'A'){
+            capturedA = data;
+            clearCanvas(c);
+            document.getElementById('stepTitle').innerText = 'B를 써주세요';
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.textContent = '완료';
+            nextBtn.classList.remove('btn-primary');
+            nextBtn.classList.add('btn-success');
+            currentStep = 'B';
+        }else if (currentStep === 'B'){
+            localStorage.setItem('handwritingImageA', capturedA);
+            localStorage.setItem('handwritingImageB', data);
+            window.location.href = 'result.html';
+        }
+    }
+
+    // ===== 초기화 =====
+    const canvas = document.getElementById('canvasOne');
+    applyDpiScale(canvas);
+    enableDrawingLite(canvas);
+
+    document.getElementById('clearBtn').addEventListener('click', () => clearCanvas(canvas));
+    document.getElementById('nextBtn').addEventListener('click', captureAndNext);
+
+    let resizeRAF = null;
+    window.addEventListener('resize', () => {
+        if (resizeRAF) cancelAnimationFrame(resizeRAF);
+        resizeRAF = requestAnimationFrame(() => {
+            resizePreserve(canvas);
+        });
+    });
+</script>
+</body>
+</html>

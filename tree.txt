@@ -1,0 +1,40 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+새로운 기능 및 개선 사항에 대 한 최신 PowerShell을 설치 하세요! https://aka.ms/PSWindows
+
+PS C:\Users\AISW-509-209> cd C:\Users\AISW-509-209\Desktop\융프2학기\1104\05조_최종압축파일
+PS C:\Users\AISW-509-209\Desktop\융프2학기\1104\05조_최종압축파일> tree /f /a
+Windows  볼륨에 대한 폴더 경로의 목록입니다.
+볼륨 일련 번호는 BCF0-6480입니다.
+C:.
+|   app.py
+|   companion.py
+|   Requirements.txt
+|   start_server.bat
+|   tree.txt
+|   verify_siamese.py
+|   서버점유시절차.docx
+|
++---fontHacker
+|   |   draw.html
+|   |   FontHacker.iml
+|   |   index.html
+|   |   result.html
+|   |   styles.css
+|   |
+|   +---.idea
+|   |       .gitignore
+|   |       misc.xml
+|   |       modules.xml
+|   |       vcs.xml
+|   |       workspace.xml
+|   |
+|   \---images
+|           icon_32.png
+|           icon_64.png
+|
+\---saved_model
+        model_lines_Ver06.keras
+
+PS C:\Users\AISW-509-209\Desktop\융프2학기\1104\05조_최종압축파일>
